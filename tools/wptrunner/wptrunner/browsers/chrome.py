@@ -1,5 +1,6 @@
 # mypy: allow-untyped-defs
 
+import os
 import re
 import time
 
@@ -133,6 +134,8 @@ def executor_kwargs(logger, test_type, test_environment, run_info_data, subsuite
     chrome_options["args"].append("--disable-infobars")
     # For WebNN tests.
     chrome_options["args"].append("--enable-features=WebMachineLearningNeuralNetwork")
+    # For extension tests.
+    chrome_options["args"].append(f"--load-extension={os.path.abspath('webextensions/resources/runtime')}")
 
     # Classify `http-private`, `http-public` and https variants in the
     # appropriate IP address spaces.
