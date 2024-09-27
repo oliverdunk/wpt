@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<title>Test browser.runtime</title>
+<meta name="extension" content="resources/runtime">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/resources/testdriver.js"></script>
+<script src="/resources/testdriver-actions.js"></script>
+<script src="/resources/testdriver-vendor.js"></script>
+<script src="/webextensions/webextensions-helpers.js"></script>
+<script>
+setup({explicit_done: true, explicit_timeout: true})
+const asyncTests = {};
+
+// Test are executed by the extensions inside of their background script
+// or in a content script. The results are sent back to the test runner
+// via postMessage.
+window.addEventListener("message", async ({data}) => {
+  // WPTTestResults is a bool set on the test runner being run by
+  // the extension.
+  if (data.WPTTestResults) {
+    console.error(data);
+    const {name} = data
+
+    if (data.isAsyncTest) {
+      if (data.asyncResult !== undefined) {
+        const t = asyncTests[name]
+        t.step(() => {
+          assert_true(data.asyncResult, name);
+        })
+        t.done();
+      } else {
+        asyncTests[name] = async_test(name);
+      }
+    } else {
+      test(() => {
+        assert_true(data.result, name)
+      }, /* TODO better titles */ name.replace('Exists', ' Exists'))
+    }
+  }
+})
+</script>
+<iframe id="testIframe"></iframe>
